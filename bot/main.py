@@ -1,5 +1,6 @@
 from telethon import TelegramClient, events
 
+from bot.commands.git_handler import handle_git
 from bot.config import API_HASH, API_ID, AUTHORIZED_USER_ID, BOT_TOKEN, DOWNLOAD_DIR
 from bot.handlers.media import handle_media
 from bot.logger import logger
@@ -39,8 +40,16 @@ async def forwarded_handler(event):
     await handle_media(event)
 
 
+@client.on(events.NewMessage(pattern=r"^/git"))
+async def git_command(event):
+    if event.sender_id != AUTHORIZED_USER_ID:
+        return
+    await handle_git(event)
+
+
 if __name__ == "__main__":
     try:
+        logger.info("tghunter starting....")
         client.run_until_disconnected()
     except KeyboardInterrupt:
         logger.info("Bot stopped by user.")
