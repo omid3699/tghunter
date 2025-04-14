@@ -1,8 +1,7 @@
-import asyncio
-
 from telethon import TelegramClient, events
 
 from bot.config import API_HASH, API_ID, AUTHORIZED_USER_ID, BOT_TOKEN, DOWNLOAD_DIR
+from bot.handlers.media import handle_media
 from bot.logger import logger
 
 # Ensure download dir exists
@@ -35,8 +34,13 @@ async def main():
     await client.run_until_disconnected()
 
 
+@client.on(events.NewMessage(incoming=True, forwards=True))
+async def forwarded_handler(event):
+    await handle_media(event)
+
+
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        client.run_until_disconnected()
     except KeyboardInterrupt:
         logger.info("Bot stopped by user.")
