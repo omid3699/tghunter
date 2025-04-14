@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  tghunter:
+    build:
+      context: .
+      dockerfile: Podmanfile
+    volumes:
+      - ./download:/app/download:Z
+    env_file:
+      - .env
+    restart: always
