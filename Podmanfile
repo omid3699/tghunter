@@ -1,9 +1,29 @@
-FROM python:3.11-slim
+# Use an official Python runtime as the base image
+FROM python:3.9-slim
 
+# Set the working directory inside the container
 WORKDIR /app
 
-COPY . /app
+# Install required system tools like httrack, git, and others
+RUN apt-get update && \
+    apt-get install -y \
+    httrack \
+    git \
+    curl \
+    build-essential \
+    aria2
+    && rm -rf /var/lib/apt/lists/*  # Clean up after installation
 
+# Copy the requirements file and install Python dependencies
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "-m", "bot.main"]
+# Copy the entire project into the container
+COPY . /app/
+
+
+# Expose necessary ports (for telethon or other services)
+EXPOSE 8080
+
+# Command to run the bot
+CMD ["python", "-m", "bot.main"]  

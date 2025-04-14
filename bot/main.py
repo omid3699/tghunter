@@ -1,5 +1,6 @@
 from telethon import TelegramClient, events
 
+from bot.commands.aria2_handler import download_with_aria2
 from bot.commands.clone_handler import handle_clone
 from bot.commands.git_handler import handle_git
 from bot.commands.pip_handler import handle_pip
@@ -89,6 +90,26 @@ async def clone_command(event):
     if event.sender_id != AUTHORIZED_USER_ID:
         return
     await handle_clone(event)
+
+
+@client.on(events.NewMessage(pattern="/download"))
+async def download_file(event):
+    """Handle file downloads from direct URLs."""
+    try:
+        url = event.text.split(" ", 1)[1].strip()  # Extract URL from the message
+    except IndexError:
+        await event.reply("Please provide a valid URL.")
+        return
+
+    await event.reply(f"Starting download from {url}...")
+
+    # Start the download using Aria2
+    download_successful = await download_with_aria2(url)
+
+    if download_successful:
+        await event.reply(f"Download of {url} completed successfully!")
+    else:
+        await event.reply(f"Download of {url} failed.")
 
 
 if __name__ == "__main__":
