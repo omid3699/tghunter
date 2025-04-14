@@ -1,5 +1,6 @@
 from telethon import TelegramClient, events
 
+from bot.commands.clone_handler import handle_clone
 from bot.commands.git_handler import handle_git
 from bot.commands.pip_handler import handle_pip
 from bot.commands.youtube_handler import download_youtube, handle_youtube, user_choices
@@ -81,6 +82,13 @@ async def callback_handler(event):
     await event.edit(f"⏳ Downloading as {mode.upper()}...")
     await download_youtube(choice["url"], mode, event)
     del user_choices[choice_id]
+
+
+@client.on(events.NewMessage(pattern=r"^/clone"))
+async def clone_command(event):
+    if event.sender_id != AUTHORIZED_USER_ID:
+        return
+    await handle_clone(event)
 
 
 if __name__ == "__main__":
