@@ -1,6 +1,8 @@
 from telethon import TelegramClient, events
 
 from bot.commands.git_handler import handle_git
+from bot.commands.pip_handler import handle_pip
+from bot.commands.youtube_handler import download_youtube, handle_youtube, user_choices
 from bot.config import API_HASH, API_ID, AUTHORIZED_USER_ID, BOT_TOKEN, DOWNLOAD_DIR
 from bot.handlers.media import handle_media
 from bot.logger import logger
@@ -45,6 +47,40 @@ async def git_command(event):
     if event.sender_id != AUTHORIZED_USER_ID:
         return
     await handle_git(event)
+
+
+@client.on(events.NewMessage(pattern=r"^/pip"))
+async def pip_command(event):
+    if event.sender_id != AUTHORIZED_USER_ID:
+        return
+    await handle_pip(event)
+
+
+@client.on(events.NewMessage(pattern=r"^/yt"))
+async def yt_command(event):
+    if event.sender_id != AUTHORIZED_USER_ID:
+        return
+    await handle_youtube(event)
+
+
+@client.on(events.CallbackQuery())
+async def callback_handler(event):
+    data = event.data.decode()
+
+    if not data.startswith("yt_"):
+        return
+
+    _, choice_id, mode = data.split("_")
+
+    choice = user_choices.get(choice_id)
+
+    if not choice:
+        await event.answer("❌ Session expired", alert=True)
+        return
+
+    await event.edit(f"⏳ Downloading as {mode.upper()}...")
+    await download_youtube(choice["url"], mode, event)
+    del user_choices[choice_id]
 
 
 if __name__ == "__main__":
